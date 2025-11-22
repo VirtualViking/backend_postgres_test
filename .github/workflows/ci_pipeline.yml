@@ -12,7 +12,7 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password  # Clave interna para la prueba en GitHub
+          POSTGRES_PASSWORD: root  # Clave interna para la prueba en GitHub
           POSTGRES_DB: parcial_db
         ports:
           - 5432:5432

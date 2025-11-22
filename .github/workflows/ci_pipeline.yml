@@ -1,0 +1,52 @@
+name: CI Pipeline - Postgres Test
+
+on: [push]
+
+jobs:
+  test-postgres:
+    runs-on: ubuntu-latest
+
+    services:
+      # GitHub levanta un contenedor Postgres limpio y rápido
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password  # Clave interna para la prueba en GitHub
+          POSTGRES_DB: parcial_db
+        ports:
+          - 5432:5432
+        # Chequeo de salud nativo y confiable
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Un sleep mínimo de 5s es suficiente para Postgres (es mucho más rápido que MySQL)
+    - name: Wait for DB
+      run: sleep 5
+
+    - name: Run Tests
+      env:
+        # Conectamos Python al servicio de arriba
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: root
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_DB: parcial_db
+      run: |
+        pytest
